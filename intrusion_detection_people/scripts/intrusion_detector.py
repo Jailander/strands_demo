@@ -8,7 +8,7 @@ from sensor_msgs.msg import Image
 from robot_talk.msg import RobotTalk
 from robot_talk.proxy import RobotTalkProxy
 
-from soma_manager.srv import SOMA2QueryObjs, SOMA2QueryObjsRequest
+from soma_manager.srv import SOMAQueryObjs, SOMAQueryObjsRequest
 from soma_io.observation import Observation
 from soma_io.state import World, Object
 
@@ -35,8 +35,8 @@ from sensor_msgs.msg import *
 from bayes_people_tracker.msg import PeopleTracker
 from sensor_msgs.msg import Image, PointCloud2, CameraInfo, JointState
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped, PoseArray, Pose
-from soma_manager.srv import SOMA2InsertObjs
-from soma2_msgs.msg import SOMA2Object
+from soma_manager.srv import SOMAInsertObjs
+from soma_msgs.msg import SOMAObject
 from vision_people_logging.srv import CaptureUBD
 
 import math
@@ -73,11 +73,11 @@ def get_polygon(xs, ys):
 class IntrusionDetector():
 
     def __init__(self, config_file=None, blog=None):    
-        soma_srv_name = '/soma2/query_db'
+        soma_srv_name = '/soma/query_objects'
         rospy.loginfo("Waiting for SOMA query service...")
         rospy.wait_for_service(soma_srv_name)
         rospy.loginfo("Done")        
-        self.soma_srv = rospy.ServiceProxy(soma_srv_name, SOMA2QueryObjs)
+        self.soma_srv = rospy.ServiceProxy(soma_srv_name, SOMAQueryObjs)
 
         if config_file:
             self._config_file = config_file
@@ -252,7 +252,7 @@ class IntrusionDetector():
     def get_rois(self):
         rois = []
         try:
-            req = SOMA2QueryObjsRequest()
+            req = SOMAQueryObjsRequest()
             req.query_type = 2
             rospy.loginfo("Requesting ROIs")
             res = self.soma_srv(req)
@@ -267,7 +267,7 @@ class IntrusionDetector():
     def get_objects(self, roi_id):
 
         try:
-            req = SOMA2QueryObjsRequest()
+            req = SOMAQueryObjsRequest()
             req.query_type = 0 
             req.useroi = True
             req.roi_id = str(roi_id)
