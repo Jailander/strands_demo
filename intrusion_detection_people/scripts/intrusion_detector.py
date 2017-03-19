@@ -8,9 +8,7 @@ from sensor_msgs.msg import Image
 from robot_talk.msg import RobotTalk
 from robot_talk.proxy import RobotTalkProxy
 
-from soma_manager.srv import SOMAQueryObjs, SOMAQueryObjsRequest
-from soma_io.observation import Observation
-from soma_io.state import World, Object
+from soma_manager.srv import SOMAQueryROIs, SOMAQueryROIsRequest
 
 from mongodb_store.message_store import MessageStoreProxy
 from robblog.msg import RobblogEntry
@@ -35,8 +33,6 @@ from sensor_msgs.msg import *
 from bayes_people_tracker.msg import PeopleTracker
 from sensor_msgs.msg import Image, PointCloud2, CameraInfo, JointState
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped, PoseArray, Pose
-from soma_manager.srv import SOMAInsertObjs
-from soma_msgs.msg import SOMAObject
 from vision_people_logging.srv import CaptureUBD
 
 import math
@@ -73,11 +69,11 @@ def get_polygon(xs, ys):
 class IntrusionDetector():
 
     def __init__(self, config_file=None, blog=None):    
-        soma_srv_name = '/soma/query_objects'
+        soma_srv_name = '/soma/query_rois'
         rospy.loginfo("Waiting for SOMA query service...")
         rospy.wait_for_service(soma_srv_name)
         rospy.loginfo("Done")        
-        self.soma_srv = rospy.ServiceProxy(soma_srv_name, SOMAQueryObjs)
+        self.soma_srv = rospy.ServiceProxy(soma_srv_name, SOMAQueryROIs)
 
         if config_file:
             self._config_file = config_file
@@ -252,8 +248,8 @@ class IntrusionDetector():
     def get_rois(self):
         rois = []
         try:
-            req = SOMAQueryObjsRequest()
-            req.query_type = 2
+            req = SOMAQueryROIsRequest()
+            req.query_type = 1
             rospy.loginfo("Requesting ROIs")
             res = self.soma_srv(req)
             rois = res.rois
@@ -264,25 +260,6 @@ class IntrusionDetector():
 
         return rois
 
-    def get_objects(self, roi_id):
-
-        try:
-            req = SOMAQueryObjsRequest()
-            req.query_type = 0 
-            req.useroi = True
-            req.roi_id = str(roi_id)
-            req.usedates = True
-            req.lowerdate = int(self.start) * 1000 # MongoDB requires time in miliseconds
-            req.upperdate = int(self.end) * 1000 # MongoDB requires time in miliseconds
-
-            rospy.loginfo("Requesting objects")
-            res = self.soma_srv(req)
-            rospy.loginfo("Received objects: %s", len(res.objects))
-            
-        except rospy.ServiceException, e:
-            rospy.logerr("Service call failed: %s"%e)
-
-        return res
 
     def get_roi_name(self, roi_id):
         if roi_id not in self.kb:

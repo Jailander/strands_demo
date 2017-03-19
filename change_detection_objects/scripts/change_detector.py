@@ -10,7 +10,7 @@ from sensor_msgs.msg import Image
 from robot_talk.msg import RobotTalk
 from robot_talk.proxy import RobotTalkProxy
 
-from soma_manager.srv import SOMA2QueryObjs, SOMA2QueryObjsRequest
+from soma_manager.srv import SOMAQueryROIs, SOMAQueryROIsRequest
 from soma_io.observation import Observation
 from soma_io.state import World, Object
 
@@ -43,8 +43,8 @@ from sensor_msgs.msg import *
 from bayes_people_tracker.msg import PeopleTracker
 from sensor_msgs.msg import Image, PointCloud2, CameraInfo, JointState
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped, PoseArray, Pose
-from soma_manager.srv import SOMA2InsertObjs
-from soma2_msgs.msg import SOMA2Object
+from soma_manager.srv import SOMAInsertObjs
+from soma_msgs.msg import SOMAObject
 from vision_people_logging.srv import CaptureUBD
 
 import math
@@ -80,11 +80,11 @@ def get_polygon(xs, ys):
 class ChangeDetector():
 
     def __init__(self, config_file=None, blog=None):    
-        soma_srv_name = '/soma2/query_db'
+        soma_srv_name = '/soma/query_rois'
         rospy.loginfo("Waiting for SOMA query service...")
         rospy.wait_for_service(soma_srv_name)
         rospy.loginfo("Done")        
-        self.soma_srv = rospy.ServiceProxy(soma_srv_name, SOMA2QueryObjs)
+        self.soma_srv = rospy.ServiceProxy(soma_srv_name, SOMAQueryROIs)
 
         if config_file:
             self._config_file = config_file
@@ -208,7 +208,7 @@ class ChangeDetector():
     def get_rois(self):
         rois = []
         try:
-            req = SOMA2QueryObjsRequest()
+            req = SOMAQueryROIsRequest()
             req.query_type = 2
             rospy.loginfo("Requesting ROIs")
             res = self.soma_srv(req)
@@ -305,7 +305,7 @@ class ChangeDetector():
                     # get image mask (get it from the latched topic)
                     #img = rospy.wait_for_message('/object_manager/requested_object_mask', Image, 10)
                     # generate blog entry
-                self.gen_blog_entry(self.kb[wp]['roi_id'], obj, objs)
+                #self.gen_blog_entry(self.kb[wp]['roi_id'], obj, objs)
                     
             rospy.sleep(5.) # sleep for some time
         rospy.loginfo("Change detection for objects finished")   

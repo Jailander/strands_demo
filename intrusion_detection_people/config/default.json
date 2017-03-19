@@ -1,10 +1,10 @@
 { 
-  "24": {   
-    "name" : "IRlab (restricted access)",  
+  "1": {   
+    "name" : "office",  
     "intrusion_detection" : "true" 	
   },
-  "25": {
-    "name" : "Common area",  
-    "intrusion_detection" : "false" 	
+  "2": {
+    "name" : "Robot lab",  
+    "intrusion_detection" : "true" 	
   }
 }
